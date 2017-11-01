@@ -212,7 +212,10 @@ create or replace PACKAGE BODY BL_PROCESS_INTEREST AS
           WHERE status = GLOBAL_VARIABLE.k_status_active
             AND cp_date BETWEEN start_date and end_date
             AND ACCOUNT_ID != 1000000;
-   
+    
+    v_procedure VARCHAR2(100):= v_package||'.PAY_INTEREST';
+    v_param_in VARCHAR2(3000);
+
    ERR_APP_FOR EXCEPTION;
    BEGIN
       po_ok:='OK';
@@ -231,7 +234,14 @@ create or replace PACKAGE BODY BL_PROCESS_INTEREST AS
          
       EXCEPTION
         WHEN ERR_APP_FOR THEN
-           NULL;
+            v_param_in := 'pi_account_id:'|| rec.account_id ||
+                   ', pi_date:'|| TO_CHAR(pi_date,'DD-MM-YYYY HH24:MI:SS')||
+                   ', pi_tran_id:'||pi_tran_id;
+
+        TX_TR_ERROR_LOG.SAVE_LOG (  PI_TRAN_ID => pi_tran_id,
+                                    PI_ERROR_MSG => po_error_message,
+                                    PI_ERROR_SOURCE => v_procedure||'('||v_param_in||')') ;  
+   
             --TODO: guardar todas las cttas q no hayan concluido su proceso..
       END;                                      
     END LOOP;
