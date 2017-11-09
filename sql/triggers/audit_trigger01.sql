@@ -1,0 +1,36 @@
+CREATE OR REPLACE TRIGGER AUDIT_TR_ACCOUNT_UPD
+BEFORE UPDATE ON TR_ACCOUNT
+FOR EACH ROW
+DECLARE
+    v_old_values HIS_AUDIT_TABLE.OLD_VALUES%TYPE; 
+    v_new_values HIS_AUDIT_TABLE.NEW_VALUES%TYPE;
+BEGIN
+    v_old_values:= 
+    'ACCOUNT_ID: '||:OLD.ACCOUNT_ID
+    ||'SALD_AMOUNT'||:OLD.SALD_AMOUNT
+    ||'START_DATE'||:OLD.START_DATE
+    ||'END_DATE'||:OLD.END_DATE
+    ||'STATUS'||:OLD.STATUS
+    ||'START_USER_CODE'||:OLD.START_USER_CODE
+    ||'END_USER_CODE'||:OLD.END_USER_CODE ;
+
+v_new_values:= 
+    'ACCOUNT_ID: '||:NEW.ACCOUNT_ID
+    ||'SALD_AMOUNT'||:NEW.SALD_AMOUNT
+    ||'START_DATE'||:NEW.START_DATE
+    ||'END_DATE'||:NEW.END_DATE
+    ||'STATUS'||:NEW.STATUS
+    ||'START_USER_CODE'||:NEW.START_USER_CODE
+    ||'END_USER_CODE'||:NEW.END_USER_CODE ;
+
+    INSERT INTO his_audit_table (
+    created_date,table_name,action,
+    old_values,new_values,user_code) 
+    VALUES (SYSDATE, 'TR_ACCOUNT', 'UPDATE', 
+    v_old_values, v_new_values, USER);
+
+END AUDIT_TR_ACCOUNT_UPD;
+
+
+
+
